@@ -856,18 +856,39 @@ def visualize_prompt_overlay(
 
 
 def plot_results(img, results):
+    if isinstance(img, Image.Image):
+        img_np = np.array(img)
+    elif isinstance(img, torch.Tensor):
+        img_np = img.detach().cpu().numpy()
+    else:
+        img_np = np.asarray(img)
+
+    if (
+        img_np.ndim == 3
+        and img_np.shape[0] in (1, 3, 4)
+        and img_np.shape[-1] not in (1, 3, 4)
+    ):
+        img_np = np.transpose(img_np, (1, 2, 0))
+
+    if img_np.ndim == 3 and img_np.shape[-1] == 1:
+        img_np = img_np.squeeze(-1)
+
+    if img_np.ndim not in (2, 3):
+        raise TypeError(f"Invalid shape {img_np.shape} for image data")
+
+    img_h, img_w = img_np.shape[:2]
+
     plt.figure(figsize=(12, 8))
-    plt.imshow(img)
+    plt.imshow(img_np)
     nb_objects = len(results["scores"])
     print(f"found {nb_objects} object(s)")
     for i in range(nb_objects):
         color = COLORS[i % len(COLORS)]
         plot_mask(results["masks"][i].squeeze(0).cpu(), color=color)
-        w, h = img.size
         prob = results["scores"][i].item()
         plot_bbox(
-            h,
-            w,
+            img_h,
+            img_w,
             results["boxes"][i].cpu(),
             text=f"(id={i}, {prob=:.2f})",
             box_format="XYXY",
