@@ -80,7 +80,7 @@ pip install torch==2.7.0 torchvision torchaudio --index-url https://download.pyt
 3. **Clone the repository and install the package:**
 
 ```bash
-git clone https://github.com/facebookresearch/sam3.git
+git clone -b dex git@github.com:Jim-Young6709/sam3.git
 cd sam3
 pip install -e .
 ```
